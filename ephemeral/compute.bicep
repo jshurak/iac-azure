@@ -9,7 +9,7 @@ param vmHWType string
 param vmPW string
 
 resource networkInterface 'Microsoft.Network/networkInterfaces@2020-11-01' = [for i in range(0,vmCount):{
-  name: '${prefix}-vm-0${i}'
+  name: '${prefix}-nic-0${i}'
   location: location
   properties: {
     ipConfigurations: [
@@ -42,9 +42,9 @@ resource ansibleVMs 'Microsoft.Compute/virtualMachines@2020-12-01' = [for i in r
     storageProfile: {
       imageReference: {
         publisher: 'Canonical'
-        offer: 'UbuntuServer'
-        sku: '16.04-LTS'
-        version: 'latest'
+        offer: 'ubuntu-26_04-lts'
+        sku: 'server'
+        version: '26.04.202604210'
       }
       osDisk: {
         name: '${prefix}-disk-0${i}'
