@@ -42,7 +42,7 @@ flowchart TB
 ```
 azure/
 ├── main.bicep              # Orchestrates network, compute, and gateway modules
-├── main.bicepparam         # Parameters for full-stack deployment (includes Key Vault secrets)
+├── main.bicepparam         # Required for deployment (not committed — see below)
 └── modules/
     ├── rg.bicep            # Subscription-scoped: creates resource group
     ├── network.bicep       # VNet and subnets; exports subnet IDs
@@ -101,37 +101,75 @@ Subscription-scoped template that creates the `iac-infra-rg` resource group. Dep
 
 - [Azure CLI](https://learn.microsoft.com/cli/azure/install-azure-cli) with Bicep support (`az bicep install`)
 - An Azure subscription and rights to deploy networking, compute, and Key Vault–backed secrets
-- For parameterized deployments: a Key Vault (`js-kv-infra` in `js-infra-aa-rg`) with secrets referenced in `*.bicepparam` files
+- A Key Vault with the secrets listed below (see [Required parameters file](#required-parameters-file))
 
-## Secrets and parameters
+## Required parameters file
 
-Sensitive values are loaded from Key Vault in parameter files, not stored in the repo:
+Full-stack deployment **requires** a `main.bicepparam` file in the repository root. This file is **gitignored** (see `.gitignore`) so subscription IDs, vault names, and secret references are never committed. Create `main.bicepparam` locally before your first deploy.
 
-| Secret (Key Vault) | Used for |
-|--------------------|----------|
-| `vm-pw` | VM admin password |
-| `gw-shared-key` | VPN IPsec shared key |
+`main.bicep` defines no default values — every parameter below must be supplied in `main.bicepparam`.
 
-Example from `main.bicepparam`:
+### Required parameters
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| `location` | `string` | Yes | Azure region for all resources (e.g. `eastus`) |
+| `vmCount` | `int` | Yes | Number of virtual machines to deploy |
+| `prefix` | `string` | Yes | Name prefix for VMs, NICs, and disks |
+| `adminName` | `string` | Yes | Local admin username on each VM |
+| `vmHWType` | `string` | Yes | Azure VM size (e.g. `Standard_B1ls`) |
+| `vmPW` | `string` (secure) | Yes | VM admin password — load from Key Vault |
+| `gwSharedKey` | `string` (secure) | Yes | IPsec shared key for the VPN connection — load from Key Vault |
+
+### Key Vault secrets
+
+Store these secrets in your vault before deploying. Names must match the last argument of each `az.getSecret()` call.
+
+| Key Vault secret name | Parameter | Used for |
+|-----------------------|-----------|----------|
+| `vm-pw` | `vmPW` | VM admin password |
+| `gw-shared-key` | `gwSharedKey` | VPN site-to-site IPsec pre-shared key |
+
+`az.getSecret()` arguments: **subscription ID**, **resource group containing the vault**, **vault name**, **secret name**.
+
+### Example `main.bicepparam` (sanitized)
+
+Copy this to `main.bicepparam` and replace the placeholder values with your environment:
 
 ```bicep
-param vmPW = az.getSecret('<subscriptionId>', 'js-infra-aa-rg', 'js-kv-infra', 'vm-pw')
-param gwSharedKey = az.getSecret('<subscriptionId>', 'js-infra-aa-rg', 'js-kv-infra', 'gw-shared-key')
+using './main.bicep'
+
+param location = 'eastus'
+param vmCount = 3
+param prefix = 'myapp'
+param adminName = 'azureadmin'
+param vmHWType = 'Standard_B1ls'
+
+// VM admin password — secret must exist in Key Vault as 'vm-pw'
+param vmPW = az.getSecret(
+  '00000000-0000-0000-0000-000000000000',
+  'my-secrets-rg',
+  'my-key-vault',
+  'vm-pw'
+)
+
+// VPN IPsec shared key — secret must exist in Key Vault as 'gw-shared-key'
+param gwSharedKey = az.getSecret(
+  '00000000-0000-0000-0000-000000000000',
+  'my-secrets-rg',
+  'my-key-vault',
+  'gw-shared-key'
+)
 ```
 
-Replace `<subscriptionId>` with your subscription ID. Deploying with `*.bicepparam` requires appropriate Key Vault access (e.g. RBAC **Key Vault Secrets User** on the vault).
+| Placeholder | Replace with |
+|-------------|--------------|
+| `00000000-0000-0000-0000-000000000000` | Your Azure subscription ID |
+| `my-secrets-rg` | Resource group that contains the Key Vault |
+| `my-key-vault` | Key Vault name |
+| `vm-pw` / `gw-shared-key` | Secret names in the vault (or change to match your naming) |
 
-### Main deployment parameters
-
-| Parameter | Description | Example |
-|-----------|-------------|---------|
-| `location` | Azure region | `eastus` |
-| `vmCount` | Number of VMs | `3` |
-| `prefix` | Name prefix for VMs, NICs, disks | `js` |
-| `adminName` | VM admin username | `js-admin` |
-| `vmHWType` | VM size | `Standard_B1ls` |
-| `vmPW` | Admin password (secure) | From Key Vault |
-| `gwSharedKey` | VPN shared key (secure) | From Key Vault |
+Deploying with `main.bicepparam` requires Key Vault access at deployment time (e.g. RBAC **Key Vault Secrets User** on the vault, or equivalent legacy access policy).
 
 ## Deployment
 
@@ -145,7 +183,9 @@ az deployment sub create \
 
 ### 2. Full stack (recommended entry point)
 
-Deploys network, compute, and gateway from `main.bicep`:
+1. Create `main.bicepparam` from the [sanitized example](#example-mainbicepparam-sanitized) (required; not in git).
+2. Ensure Key Vault secrets `vm-pw` and `gw-shared-key` exist.
+3. Deploy:
 
 ```bash
 az deployment group create \
@@ -153,6 +193,8 @@ az deployment group create \
   --template-file main.bicep \
   --parameters main.bicepparam
 ```
+
+The `--parameters main.bicepparam` argument is required for full-stack deployment; `main.bicep` cannot be deployed without it.
 
 `compute` and `gateway` modules declare `dependsOn: [ vnet ]` so the root network module completes first.
 
@@ -208,7 +250,7 @@ az bicep build --file modules/compute.bicep
 - **Subnets:** Edit the `subnets` array in `modules/network.bicep` and reference new keys on `subnetIds` in other modules (e.g. `subnetIds.dbSubnet`).
 - **VPN peer:** Update `localNetworkGateway` properties in `modules/gateway.bicep` (address space, `gatewayIpAddress`).
 - **VM image/size:** Adjust `storageProfile.imageReference` and `vmHWType` in compute templates/params.
-- **Region:** Set `location` in `main.bicepparam` and ensure child modules use the same region consistently.
+- **Region:** Set `location` in your local `main.bicepparam` and ensure child modules use the same region consistently.
 
 ## Related documentation
 
