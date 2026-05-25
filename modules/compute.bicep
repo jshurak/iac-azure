@@ -2,13 +2,18 @@ param location string
 param vmCount int
 param prefix string
 param adminName string
-param subnetID string
 param vmHWType string
 
 @secure()
 param vmPW string
 
-resource networkInterface 'Microsoft.Network/networkInterfaces@2020-11-01' = [for i in range(0,vmCount):{
+module vnet './network.bicep' ={
+  name: 'network'
+}
+
+var computeSubnetId = vnet.outputs.subnetIds.vmSubnet
+
+resource networkInterface 'Microsoft.Network/networkInterfaces@2020-11-01' = [for i in range(1,vmCount):{
   name: '${prefix}-nic-0${i}'
   location: location
   properties: {
@@ -18,7 +23,7 @@ resource networkInterface 'Microsoft.Network/networkInterfaces@2020-11-01' = [fo
         properties: {
           privateIPAllocationMethod: 'Dynamic'
           subnet: {
-            id: subnetID
+            id: computeSubnetId
           }
         }
       }

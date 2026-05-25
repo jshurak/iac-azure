@@ -1,7 +1,14 @@
-param virtualNetworkGateways_js_vpn_gw_name string = 'js-vpn-gw'
-param virtualNetworks_js_vnet_externalid string = '/subscriptions/01884496-61d8-43f9-af5a-dc218de550e1/resourceGroups/iac-infra-rg/providers/Microsoft.Network/virtualNetworks/js-vnet'
+param vnetGatewayName string = 'js-vpn-gw'
+//param virtualNetworks_js_vnet_externalid string = '/subscriptions/01884496-61d8-43f9-af5a-dc218de550e1/resourceGroups/iac-infra-rg/providers/Microsoft.Network/virtualNetworks/js-vnet'
 param location string = 'eastus'
 param gwSharedKey string
+
+
+module vnet './network.bicep' ={
+  name: 'network'
+}
+
+var gatewaySubnetId = vnet.outputs.subnetIds.gatewaySubnet
 
 resource publicIPAddress 'Microsoft.Network/publicIPAddresses@2019-11-01' = {
   name: 'js-gw-pip${uniqueString(resourceGroup().id)}'
@@ -19,7 +26,7 @@ resource publicIPAddress 'Microsoft.Network/publicIPAddresses@2019-11-01' = {
 
 
 resource virtualNetworkGateway 'Microsoft.Network/virtualNetworkGateways@2025-05-01' = {
-  name: virtualNetworkGateways_js_vpn_gw_name
+  name: vnetGatewayName
   location: 'eastus'
   properties: {
     enablePrivateIpAddress: false
@@ -36,7 +43,7 @@ resource virtualNetworkGateway 'Microsoft.Network/virtualNetworkGateways@2025-05
             id: publicIPAddress.id
           }
           subnet: {
-            id: '${virtualNetworks_js_vnet_externalid}/subnets/gatewaySubnet'
+            id: gatewaySubnetId
           }
         }
       }
