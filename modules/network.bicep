@@ -1,4 +1,5 @@
-param location string = 'eastus'
+param location string
+param prefix string
 
 
 
@@ -6,7 +7,7 @@ param subnets array = ['gateway','vm']
 
 
 resource virtualNetwork 'Microsoft.Network/virtualNetworks@2019-11-01' = {
-  name: 'js-vnet'
+  name: '${prefix}-vnet'
   location: location
   properties: {
     addressSpace: {
@@ -14,20 +15,6 @@ resource virtualNetwork 'Microsoft.Network/virtualNetworks@2019-11-01' = {
         '10.2.0.0/16'
       ]
     }
-  /*  subnets: [
-      {
-        name: 'gatewaySubnet'
-        properties: {
-          addressPrefix: '10.2.0.0/24'
-        }
-      }
-      {
-        name: 'vmSubnet'
-        properties:{
-          addressPrefix: '10.2.1.0/24'
-        }
-      }
-    ]*/
   }
 }
 

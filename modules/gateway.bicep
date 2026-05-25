@@ -1,21 +1,26 @@
 param vnetGatewayName string = 'js-vpn-gw'
 param location string = 'eastus'
 param gwSharedKey string
+param prefix string
 
 
 module vnet './network.bicep' ={
   name: 'network'
+  params:{
+    location:location
+    prefix: prefix
+  }
 }
 
 var gatewaySubnetId = vnet.outputs.subnetIds.gatewaySubnet
 
 resource publicIPAddress 'Microsoft.Network/publicIPAddresses@2019-11-01' = {
-  name: 'js-gw-pip${uniqueString(resourceGroup().id)}'
+  name: '${prefix}-gw-pip${uniqueString(resourceGroup().id)}'
   location: location
   properties: {
     publicIPAllocationMethod: 'static'
     dnsSettings: {
-      domainNameLabel: 'js-gw-pip${uniqueString(resourceGroup().id)}'
+      domainNameLabel: '${prefix}-gw-pip${uniqueString(resourceGroup().id)}'
     }
   }
   sku: {
@@ -68,7 +73,7 @@ resource virtualNetworkGateway 'Microsoft.Network/virtualNetworkGateways@2025-05
 
 
 resource localNetworkGateway 'Microsoft.Network/localNetworkGateways@2019-11-01' = {
-  name: 'js-localgw-${uniqueString(resourceGroup().id)}'
+  name: '${prefix}-localgw-${uniqueString(resourceGroup().id)}'
   location: location
   properties: {
     localNetworkAddressSpace: {

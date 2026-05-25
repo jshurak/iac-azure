@@ -4,11 +4,19 @@ param prefix string
 param adminName string
 param vmHWType string
 
+
+
 @secure()
 param vmPW string
 
+param sshPublicKeys array
+
 module vnet './network.bicep' ={
   name: 'network'
+  params:{
+    location:location
+    prefix: prefix
+  }
 }
 
 var computeSubnetId = vnet.outputs.subnetIds.vmSubnet
@@ -43,6 +51,14 @@ resource ansibleVMs 'Microsoft.Compute/virtualMachines@2020-12-01' = [for i in r
       computerName: '${prefix}0${i}'
       adminUsername: adminName
       adminPassword: vmPW
+      linuxConfiguration: {
+        ssh: {
+          publicKeys: [for key in sshPublicKeys: {
+            path: '/home/${adminName}/.ssh/authorized_keys'
+            keyData: key
+          }]
+        }
+      }
     }
     storageProfile: {
       imageReference: {
