@@ -1,4 +1,4 @@
-name: lint-validate-infrastructure
+name: lint-validate-deploy-infrastructure
 
 on:
   push:
