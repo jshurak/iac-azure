@@ -1,4 +1,4 @@
-name: lint-validate
+name: unit-test
 
 on:
   pull_request:
@@ -50,3 +50,14 @@ jobs:
           resource-group-name: ${{ secrets.AZURE_RESOURCE_GROUP_NAME }}
           template-file: ./main.bicep
           parameters-file: ./main.bicepparam
+      - name: Run Checkov actions/checkout
+        id:  checkov
+        uses: bridgecrewio/checkov-action@master
+        with:
+          framework: bicep
+      - name: Upload SARIF --file
+        if: success() || failure()
+        uses: github/codeql-action/upload-sarif@v2
+        with:
+          sarif_file: results.sarif
+          category: checkov
