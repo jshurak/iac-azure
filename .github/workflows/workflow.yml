@@ -36,7 +36,7 @@ jobs:
           subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
           resource-group-name: ${{ secrets.AZURE_RESOURCE_GROUP_NAME }}
           template-file: ./main.bicep
-          parameters-file: ./main.bicepparam
+          
       - name: What-if Preview
         uses: azure/bicep-deploy@v2
         with:
@@ -47,4 +47,4 @@ jobs:
           subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
           resource-group-name: ${{ secrets.AZURE_RESOURCE_GROUP_NAME }}
           template-file: ./main.bicep
-          parameters-file: ./main.bicepparam
+          
