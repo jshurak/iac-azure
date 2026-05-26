@@ -24,8 +24,8 @@ jobs:
         uses: azure/login@v3
         with:
           auth-type: IDENTITY
-          client-id: ${{ secrets.AZURE_CLIENT_ID }}
-          tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+          client-id: 1f3fa5e9-dbb7-407f-b3d1-06e9d546e2bd
+          tenant-id: 00c6d044-082c-4888-ab54-fc91a03303cf
           subscription-id: 01884496-61d8-43f9-af5a-dc218de550e1
       - name: Validate Bicep Template
         uses: azure/bicep-deploy@v2
