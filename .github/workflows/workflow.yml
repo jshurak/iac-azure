@@ -1,0 +1,14 @@
+name: lint-validate-deloy-infrastructure
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - name: Run Bicep linter
+        run: az bicep build --file ./main.bicep
