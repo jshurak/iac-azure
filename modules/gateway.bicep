@@ -20,7 +20,7 @@ resource publicIPAddress 'Microsoft.Network/publicIPAddresses@2019-11-01' = {
   properties: {
     publicIPAllocationMethod: 'static'
     dnsSettings: {
-      domainNameLabel: '${prefix}-gw-pip${uniqueString(resourceGroup().id)}'
+      domainNameLabel: '${prefix}-gw-pip'
     }
   }
   sku: {

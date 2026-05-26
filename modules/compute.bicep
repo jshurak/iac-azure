@@ -1,11 +1,20 @@
+@description('Location of the resources')
 param location string 
+
+@description('Number of vms to create')
 param vmCount int
+
+@description('Prefix for resources')
 param prefix string
+
+@description('admin account for vms')
 param adminName string
+
+@description('VM hardware type')
 param vmHWType string
 
 
-
+@description('Password for vm admin accounts. Pulled from Keyvault.')
 @secure()
 param vmPW string
 
@@ -21,7 +30,7 @@ module vnet './network.bicep' ={
 
 var computeSubnetId = vnet.outputs.subnetIds.vmSubnet
 
-resource networkInterface 'Microsoft.Network/networkInterfaces@2020-11-01' = [for i in range(1,vmCount):{
+resource networkInterface 'Microsoft.Network/networkInterfaces@2020-11-01' = [for i in range(0,vmCount):{
   name: '${prefix}-nic-0${i}'
   location: location
   properties: {
