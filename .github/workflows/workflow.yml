@@ -43,7 +43,7 @@ jobs:
         uses: azure/bicep-deploy@v2
         with:
           type: deployment
-          operation: whatif
+          operation: whatIf
           scope: resourceGroup
           name: main
           subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
