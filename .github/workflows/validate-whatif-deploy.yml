@@ -73,3 +73,4 @@ jobs:
           resource-group-name: ${{ secrets.AZURE_RESOURCE_GROUP_NAME }}
           template-file: ./main.bicep
           parameters-file: ./main.bicepparam
+          parameters: '{subscription: ${{ secrets.AZURE_SUBSCRIPTION_ID }}, keyVaultResourceGroupName: ${{ secrets.AZURE_KEYVAULT_RESOURCEGROUP_NAME }}, keyVaultName: ${{secrets.AZURE_KEYVAULT_NAME}}}'
