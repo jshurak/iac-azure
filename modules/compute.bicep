@@ -60,7 +60,9 @@ resource ansibleVMs 'Microsoft.Compute/virtualMachines@2020-12-01' = [for i in r
       computerName: '${prefix}0${i}'
       adminUsername: adminName
       adminPassword: vmPW
+      allowExtensionOperations: false
       linuxConfiguration: {
+        disablePasswordAuthentication: true
         ssh: {
           publicKeys: [for key in sshPublicKeys: {
             path: '/home/${adminName}/.ssh/authorized_keys'
@@ -93,6 +95,9 @@ resource ansibleVMs 'Microsoft.Compute/virtualMachines@2020-12-01' = [for i in r
       bootDiagnostics: {
         enabled: false
       }
+    }
+    securityProfile: {
+      encryptionAtHost: true
     }
   }
 }]
