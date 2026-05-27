@@ -15,21 +15,32 @@ resource virtualNetwork 'Microsoft.Network/virtualNetworks@2019-11-01' = {
         '10.2.0.0/16'
       ]
     }
-  }
+    subnets: [for name in subnets: {
+      name: '${name}Subnet'
+      properties: {
+        addressPrefix: '10.2.${indexOf(subnets,name)}.0/24'
+      }
+    }]
+  } 
 }
 
-resource subnet 'Microsoft.Network/virtualNetworks/subnets@2025-05-01' = [for name in subnets: {
+resource subs 'Microsoft.Network/virtualNetworks/subnets@2019-11-01' existing = [for name in subnets: {
+  parent: virtualNetwork
+  name: '${name}Subnet'
+}]
+
+/*resource subnet 'Microsoft.Network/virtualNetworks/subnets@2025-05-01' = [for name in subnets: {
   parent:virtualNetwork
   name: '${name}Subnet'
   properties: {
     addressPrefix: '10.2.${indexOf(subnets,name)}.0/24'
   }
-}]
+}]*/
 
 
-var subnetInfo = [for name in subnets: {
+var subnetInfo = [for (name, i) in subnets: {
   name: '${name}Subnet'
-  subnetID: subnet[indexOf(subnets, name)].id
+  subnetID: subs[i].id
 }]
 
 output subnetInfo array = subnetInfo
