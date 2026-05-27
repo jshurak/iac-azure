@@ -21,10 +21,8 @@ param sshKey2 string
 @secure()
 param gwSharedKey string
 
-// Combine Key Vault secrets here (not in .bicepparam — az.getSecret cannot nest in arrays/objects)
 var sshPublicKeys = [
   sshKey1
-  sshKey2
 ]
 
 

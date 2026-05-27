@@ -29,14 +29,6 @@ resource subs 'Microsoft.Network/virtualNetworks/subnets@2019-11-01' existing = 
   name: '${name}Subnet'
 }]
 
-/*resource subnet 'Microsoft.Network/virtualNetworks/subnets@2025-05-01' = [for name in subnets: {
-  parent:virtualNetwork
-  name: '${name}Subnet'
-  properties: {
-    addressPrefix: '10.2.${indexOf(subnets,name)}.0/24'
-  }
-}]*/
-
 
 var subnetInfo = [for (name, i) in subnets: {
   name: '${name}Subnet'
