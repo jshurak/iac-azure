@@ -1,7 +1,10 @@
 param vnetGatewayName string = 'js-vpn-gw'
 param location string = 'eastus'
-param gwSharedKey string
 param prefix string
+
+@secure()
+param gwSharedKey string
+
 
 
 module vnet './network.bicep' ={
