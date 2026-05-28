@@ -14,6 +14,6 @@ param keyVaultName = ''
 
 
 param gwSharedKey = az.getSecret(subscription,keyVaultResourceGroupName,keyVaultName,'gw-shared-key')
-param sshKey1 = az.getSecret(subscription, keyVaultResourceGroupName, keyVaultName, 'ssh-ICE')
-param sshKey2 = az.getSecret(subscription, keyVaultResourceGroupName, keyVaultName, 'ssh-jssvr01')
+param adminSSHKey = az.getSecret(subscription, keyVaultResourceGroupName, keyVaultName, 'ssh-jssvr01')
+
 

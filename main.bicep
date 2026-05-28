@@ -13,16 +13,14 @@ param keyVaultName string
 param vmPW string
 
 @secure()
-param sshKey1 string
+param adminSSHKey string
 
-@secure()
-param sshKey2 string
 
 @secure()
 param gwSharedKey string
 
 var sshPublicKeys = [
-  sshKey1
+  adminSSHKey
 ]
 
 
