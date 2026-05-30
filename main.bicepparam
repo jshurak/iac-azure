@@ -1,7 +1,7 @@
 using './main.bicep'
 
-
 param location = 'eastus'
+
 param vmCount = 3
 param prefix = 'js'
 param adminName = 'js-admin'
